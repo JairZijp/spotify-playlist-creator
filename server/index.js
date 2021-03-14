@@ -8,7 +8,8 @@ dotenv.config();
 
 const app = express();
 
-// init spotify config
+// api to connect to Spotify API, based on https://github.com/cjam/react-native-spotify-remote
+
 const spClientId = process.env.SPOTIFY_CLIENT_ID;
 const spClientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 const spClientCallback = process.env.SPOTIFY_CLIENT_CALLBACK;
