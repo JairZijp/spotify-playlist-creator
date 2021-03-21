@@ -137,10 +137,7 @@ class AppContextProvider extends React.Component<{}, AppContextState> {
             showDialog
         };
 
-        console.log('ey');
-        console.log(SPOTIFY_TOKEN_SWAP_URL);
-        console.log(SPOTIFY_TOKEN_REFRESH_URL);
-        console.log(SPOTIFY_REDIRECT_URL);
+        console.log('try connecting..');
 
         try {
             // Go and check if things are connected
@@ -156,6 +153,7 @@ class AppContextProvider extends React.Component<{}, AppContextState> {
                 ...state,
                 token: accessToken
             }));
+            console.log('set accessToken to: ', accessToken);
             await remote.connect(accessToken);
         } catch (err) {
             this.onError(err);

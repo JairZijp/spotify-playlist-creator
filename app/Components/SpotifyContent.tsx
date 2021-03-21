@@ -4,10 +4,12 @@ import { ActionSheet, View, Button, Text } from "native-base";
 import { FlatList } from "react-native";
 import SpotifyContentListItem from "./SpotifyContentListItem";
 import AppContext from "../AppContext";
+import { API_BASE } from 'react-native-dotenv';
 
 const SpotifyContent: React.SFC = () => {
-  const { isConnected, onError } = useContext(AppContext)
+  const { isConnected, onError, token } = useContext(AppContext)
   const [parentItems, setParentItems] = useState<ContentItem[]>([]);
+  let genres;
 
   // The current parent is the last parent if there are any
   const currentItem = parentItems[parentItems.length - 1];
@@ -60,9 +62,30 @@ const SpotifyContent: React.SFC = () => {
     }
   };
 
+  const fetchGenres = async () => {
+    try {
+      console.log('try request with access token: ', token);
+      fetch(API_BASE + '/genres?' + 'token=' + token, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        }
+      }).then((resp) => resp.json())
+      .then(function(data) {
+        genres = data.results;
+        console.log("genres", data);
+      });
+
+    } catch (err) {
+      onError(err);
+    }
+  };
+
   useEffect(() => {
     if (isConnected) {
       fetchItems();
+      fetchGenres();
     }
   }, [isConnected]);
 
@@ -94,6 +117,9 @@ const SpotifyContent: React.SFC = () => {
           </View>
         </View>
       )}
+      <View>
+        <Text>{genres}</Text>
+      </View>
     </View>
   )
 }
