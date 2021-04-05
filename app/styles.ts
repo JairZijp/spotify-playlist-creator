@@ -32,6 +32,9 @@ const styles = StyleSheet.create({
       textAlign: 'center',
       margin: 10,
     },
+    content: {
+      padding: 10,
+    },
     instructions: {
       textAlign: 'center',
       color: '#333333',

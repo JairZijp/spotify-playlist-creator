@@ -13,13 +13,15 @@ const Authenticate: React.SFC = () => {
         });
     }, [token])
     return (
-        <View style={{ height: 300, display: "flex", justifyContent: "space-evenly", flexDirection: "column" }}>
-            <View>
-                <Text style={{fontSize:28, textAlign:"center"}}>Connect To Spotify</Text>
+        <View style={styles.content}>
+            <View style={{ height: 300, display: "flex", justifyContent: "space-evenly", flexDirection: "column" }}>
+                <View>
+                    <Text style={{fontSize:28, textAlign:"center"}}>Connect To Spotify</Text>
+                </View>
+                <Button onPress={() => handleConnect()}>
+                    <Text>Connect!</Text>
+                </Button>
             </View>
-            <Button onPress={() => handleConnect()}>
-                <Text>Connect!</Text>
-            </Button>
         </View>
     )
 }

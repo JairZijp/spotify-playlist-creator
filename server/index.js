@@ -210,8 +210,6 @@ app.get('/callback', async (req, res) => {
   const code = req.query.code;
   const state = req.query.state;
 
-	console.log('HI callback');
-
   if (error) {
     console.error('Callback Error:', error);
     res.send(`Callback Error: ${error}`);
@@ -263,31 +261,32 @@ app.get('/callback', async (req, res) => {
 
 app.get('/genres', async (req, res) => {
 	console.log("GENRES GET", req.query)
-	let headers = JSON.stringify(req.headers);
 	spotifyApi.setAccessToken(req.query.token)
 	// Get available genre seeds
 	spotifyApi.getAvailableGenreSeeds()
 	.then(function(data) {
 		let genreSeeds = data.body;
-		console.log(data.body.genres);
 		res.send(genreSeeds);
 	}, function(err) {
 		console.log('Something went wrong!', err);
 	});
 });
 
-app.get("/url", (req, res, next) => {
-  console.log(req.query);
-  // Get Recommendations Based on Seeds
-  spotifyApi.getRecommendations(req.query)
-  .then(function(data) {
+app.get('/tracks', async (req, res) => {
+	console.log("RECOMANDATIONS GET", req.query)
+	spotifyApi.setAccessToken(req.query.token);
+	let limit = Math.ceil((req.query.hours * 60) / 3.5);
+
+	spotifyApi.getRecommendations({
+		limit: limit,
+		seed_genres: req.query.genre
+	}).then(function(data) {
     let recommendations = data.body;
-    console.log(data);
-    res.json(recommendations);
-    }, function(err) {
+    res.send(recommendations);
+	}, function(err) {
     console.log("Something went wrong!", err);
   });
 });
 
 const spServerPort = process.env.PORT ? parseInt(process.env.PORT) : 3000;
-app.listen(spServerPort, () => console.log('Example app listening on port '+spServerPort+'!'));
+app.listen(spServerPort, () => console.log('Server listening on port '+spServerPort+'!'));
