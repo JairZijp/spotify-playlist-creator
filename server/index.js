@@ -112,6 +112,7 @@ function postRequest(url, data={})
 
 // support form body
 app.use(express.urlencoded({extended: false}));
+app.use(express.json());
 
 /**
  * Swap endpoint
@@ -253,9 +254,27 @@ app.get('/callback', async (req, res) => {
  * Callback url
  */
  app.post('/playlist', async (req, res) => {
-	console.log("CREATE PLAYLIST");
-	const playlistParams = req.body.playlist
-	//https://api.spotify.com/v1/recommendations/available-genre-seeds
+	console.log("CREATE PLAYLIST", req.body);
+
+	spotifyApi.setAccessToken(req.body.token)
+
+	spotifyApi.createPlaylist('My new playlist', { 'description': 'My awesome new generated playlist', 'public': false })
+	.then(function(data) {
+		console.log('Created playlist!');
+		
+		spotifyApi.addTracksToPlaylist(data.body.id, req.body.tracks)
+		.then(function(data) {
+			console.log('Added tracks to playlist!');
+			res.send(200);
+		}, function(err) {
+			console.log('Something went wrong!', err);
+			res.send(err);
+		});
+
+	}, function(err) {
+		console.log('Something went wrong!', err);
+		res.send(err);
+	});
 
 });
 

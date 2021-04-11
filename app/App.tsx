@@ -30,7 +30,6 @@ const AppLayout: React.SFC = () => {
         :
         <>
           <Authenticate />
-          <EnvVars />
         </>
       }
 

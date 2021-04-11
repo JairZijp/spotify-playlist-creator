@@ -15,6 +15,20 @@ const Item = ({ title }) => (
   </View>
 );
 
+const Playlist = ({ tracks }) => (
+  <View style={styles.playlist}>
+    <Text>
+      Playlist created with {tracks.length} tracks:
+    </Text>
+    <FlatList
+      data={tracks}
+      renderItem={({ item }) => <Item
+        title={item.name}
+      />}
+    />
+  </View>
+);
+
 const SpotifyContent: React.SFC = () => {
   const { isConnected, onError, token } = useContext(AppContext)
   const [parentItems, setParentItems] = useState<ContentItem[]>([]);
@@ -102,15 +116,12 @@ const SpotifyContent: React.SFC = () => {
   };
 
   const createPlaylist = async() => {
-    console.log('create', genre, hours);
     try {
       let genresString = '';
       genre.forEach(item => {
         genresString += '&genre=' + item
       });
-      console.log(genresString)
-      console.log('try request with access token: ', token);
-      fetch(API_BASE + '/tracks' + '?hours=' + hours + genresString + '&token=' + token, {
+      let results = fetch(API_BASE + '/tracks' + '?hours=' + hours + genresString + '&token=' + token, {
         method: 'GET',
         headers: {
           Accept: 'application/json',
@@ -118,9 +129,27 @@ const SpotifyContent: React.SFC = () => {
         }
       }).then((resp) => resp.json())
       .then((data) => {
-        console.log("tracks", data.tracks);
         setTracks(data.tracks);
       });
+
+      results.then((data) => {
+        console.log("lets go! create playlist");
+        fetch(API_BASE + '/playlist', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            token: token,
+            tracks: tracks.map(track => track.uri)
+          })
+        }).then((resp) => resp.json())
+        .then((data) => {
+          // todo: create alert
+          console.log("playlist created!");
+        });
+      })
 
     } catch (err) {
       onError(err);
@@ -136,33 +165,8 @@ const SpotifyContent: React.SFC = () => {
 
   return (
     <View>
-      {/* {currentItem && (
-        <View style={{ display: 'flex', flexDirection: 'column' }}>
-          <View style={{ borderBottomColor: "gray", borderBottomWidth: 1, height: "9%" }}>
-            <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-              <Button
-                disabled={parentItems.length === 1}
-                bordered
-                small
-                style={{ margin: 5 }}
-                onPress={() => back()}
-              >
-                <Text>Back</Text>
-              </Button>
-              <Text style={{ flex: 1, fontSize: 20 }}>{currentItem.title}</Text>
-            </View>
-          </View>
-          <View style={{ height: "84%" }}>
-            <FlatList
-              data={currentItem.children}
-              renderItem={({ item }) => <SpotifyContentListItem
-                item={item}
-              />}
-            />
-          </View>
-        </View>
-      )} */}
       <View style={defaultStyle.content} >
+        
         <DropDownPicker
             items={genres}
             style={{backgroundColor: '#fafafa'}}
@@ -172,32 +176,31 @@ const SpotifyContent: React.SFC = () => {
             multipleText="%d genres have been selected."
             min={0}
             max={5}
-            containerStyle={{height: 40}}
+            containerStyle={{height: 50}}
             itemStyle={{
-                justifyContent: 'flex-start'
+                justifyContent: 'flex-start',
+                paddingVertical: 10,
+                borderBottomColor: '#ebebeb',
+                borderBottomWidth: 1
             }}
-        
+            dropDownStyle={{height: 400}}
         />
+  
         <TextInput
           onChangeText={text => onChangeHours(text)}
           placeholder="How many hours of music do you want?"
           keyboardType="numeric"
+          style={styles.input}
         />
-        <Button onPress={() => createPlaylist()}>
-          <Text>Create playlist</Text>
-        </Button>
         
-        <View>
-          <Text>
-            Playlist created with {tracks.length} tracks
-          </Text>
-          <FlatList
-            data={tracks}
-            renderItem={({ item }) => <Item
-              title={item.name}
-            />}
-          />
-        </View>
+          <Button onPress={() => createPlaylist()}>
+            <Text>Create playlist</Text>
+          </Button>
+        
+      
+        {tracks.length > 0 &&
+          <Playlist tracks={tracks} />
+        }
       </View>
     </View>
   )
@@ -208,11 +211,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#ebebeb',
     padding: 20,
     marginVertical: 8,
-    marginHorizontal: 16,
   },
   title: {
-    fontSize: 18,
+    fontSize: 14,
   },
+  playlist: {
+    marginVertical: 20
+  },
+  input: {
+    marginVertical: 10,
+    borderColor: '#ebebeb',
+    borderWidth: 1,
+    paddingHorizontal: 15
+  }
 });
 
 export default SpotifyContent;
